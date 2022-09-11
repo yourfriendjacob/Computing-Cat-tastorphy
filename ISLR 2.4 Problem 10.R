@@ -3,6 +3,7 @@
 # Member: Sehtab Hossain, Michelle Lu, Salam Othman, Jacob Sauther, Feng Zheng
 # University of Missouri Kansas City
 # CS5565-0001
+# Feng Zheng
 
 # load the library to get data set
 library(MASS)
