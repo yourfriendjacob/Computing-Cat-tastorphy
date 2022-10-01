@@ -3,8 +3,9 @@
 #assignment 2, question 13, 4.8
 #Fall 2022
 
-library(ISLR) #import ISLR library
-library(MASS) #import MASS library for LDA
+library(ISLR)  #import ISLR library
+library(MASS)  #import MASS library for LDA
+library(class) #import class for KNN
 
 head(Weekly)
 
@@ -49,8 +50,8 @@ glm.pred[glm.probs > 0.5] = "Up"
 table(glm.pred, Weekly[!train, ]$Direction)
 
 mean(glm.pred == Weekly[!train, ]$Direction) # mean of ~0.625
-# The mean here reflects an accuracy of about 62.5%. Which is better than before. Out of 43 down values, 9 were predicted correctly. Similarly out of 61 up values
-# 56 were predicted correctly.
+# The mean here reflects an accuracy of about 62.5%. Which is better than before. Out of 43 down values, 9 were predicted correctly (~20%). Similarly out of 61 up values
+# 56 (~91%) were predicted correctly.
 
 mean(Weekly[!train, ]$Direction == "Up") # mean of ~0.5865
 # This mean is the accuracy of a row being correctly predicted up. Again not bad, but not much of an improvement.
@@ -73,6 +74,19 @@ table(qda.pred$class, Weekly[!train, ]$Direction)
 mean(qda.pred$class == Weekly[!train, ]$Direction) #mean of ~0.5865
 # This model literally predicted that every week was an up week. Which sure means that all up weeks were predicted correctly, but all down weeks were predicted
 # incorrectly. True positive rate is 1 and false positive rate is also 1. Sure it is slightly better than where we started, it is not as great of an improvement.
+
+train.X = data.frame(Weekly[train, ]$Lag2)
+test.X = data.frame(Weekly[!train, ]$Lag2)
+train.Direction = Weekly[train, ]$Direction #train and test KNN data
+
+set.seed(1)
+knn.pred = knn(train.X, test.X, train.Direction, k = 1)
+table(knn.pred, Weekly[!train, ]$Direction) #create KNN K = 1 model
+
+mean(knn.pred == Weekly[!train, ]$Direction) # mean of ~0.5
+# With this model we don't get a great model here either. It has a prediction accuracy of 50%, which is more or less just guessing. Out of 43 down predictions
+# 21 were predicted correctly (~48%). Out of 61 up records 31 were predicted correctly (~51%). This is the worst accuracy, but has the best rate of not getting
+# false positives oddly enough.
 
 
 
