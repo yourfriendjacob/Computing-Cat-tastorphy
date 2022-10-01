@@ -4,6 +4,7 @@
 #Fall 2022
 
 library(ISLR) #import ISLR library
+library(MASS) #import MASS library for LDA
 
 head(Weekly)
 
@@ -53,5 +54,14 @@ mean(glm.pred == Weekly[!train, ]$Direction) # mean of ~0.625
 
 mean(Weekly[!train, ]$Direction == "Up") # mean of ~0.5865
 # This mean is the accuracy of a row being correctly predicted up. Again not bad, but not much of an improvement.
+
+lda.fit = lda(Direction ~ Lag2, data = Weekly, subset = train)
+lda.fit #use lda to create a model on Direction and Lag2
+
+lda.pred = predict(lda.fit, Weekly[!train, ])
+table(lda.pred$class, Weekly[!train, ]$Direction)
+mean(lda.pred$class == Weekly[!train, ]$Direction) # mean of ~0.625
+# This unfortunately this is about the same as previous prediction. Not much improvement. It has the same values of what predictors failed to predict correctly.
+
 
 
