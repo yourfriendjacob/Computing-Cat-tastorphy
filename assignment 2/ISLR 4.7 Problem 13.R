@@ -23,3 +23,8 @@ cor(Weekly[-9]) #correlation of the columns on each other
 # it is tough to nail down correlations between these column. Volume and year appear to have a correlation, but volume has really weak relations
 # with everything else. This was identified with the scatter plot. There is a weak relationship between today's returns and all the other columns
 # but that relation is very weak.
+
+glm.full = glm(Direction ~ . - Year - Today, data = Weekly, family = 'binomial')
+summary(glm.full)
+# lag2 appears to have the highest P value of about 2.9%. This is well in a 5% significance threshold. After that Lag1 is there at around 11% P value.
+
