@@ -28,3 +28,12 @@ glm.full = glm(Direction ~ . - Year - Today, data = Weekly, family = 'binomial')
 summary(glm.full)
 # lag2 appears to have the highest P value of about 2.9%. This is well in a 5% significance threshold. After that Lag1 is there at around 11% P value.
 
+glm.full.probs = predict(glm.full, type = 'response')
+glm.full.pred = rep('Down', 1089)
+glm.full.pred[glm.full.probs > 0.5] = 'Up'
+table(glm.full.pred, Weekly$Direction) # get the predictors ready
+
+mean(glm.full.pred == Weekly$Direction) # mean of ~0.5610
+# The prediction only got the direction right about 50% of the time. Which is not great. This mean reflects the accuracy of the model.
+# Note here that out of 484 down rows, the model predicted 430 of those to be up rows. Similarly out of 605 up rows only 48 of them were predicted as
+# down rows.
