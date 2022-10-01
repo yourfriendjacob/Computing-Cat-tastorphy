@@ -63,5 +63,16 @@ table(lda.pred$class, Weekly[!train, ]$Direction)
 mean(lda.pred$class == Weekly[!train, ]$Direction) # mean of ~0.625
 # This unfortunately this is about the same as previous prediction. Not much improvement. It has the same values of what predictors failed to predict correctly.
 
+#now let us try this with qda
+qda.fit = qda(Direction ~ Lag2, data = Weekly, subset = train)
+qda.fit
+
+qda.pred = predict(qda.fit, Weekly[!train, ])
+table(qda.pred$class, Weekly[!train, ]$Direction)
+
+mean(qda.pred$class == Weekly[!train, ]$Direction) #mean of ~0.5865
+# This model literally predicted that every week was an up week. Which sure means that all up weeks were predicted correctly, but all down weeks were predicted
+# incorrectly. True positive rate is 1 and false positive rate is also 1. Sure it is slightly better than where we started, it is not as great of an improvement.
+
 
 
