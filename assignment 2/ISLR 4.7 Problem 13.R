@@ -37,3 +37,21 @@ mean(glm.full.pred == Weekly$Direction) # mean of ~0.5610
 # The prediction only got the direction right about 50% of the time. Which is not great. This mean reflects the accuracy of the model.
 # Note here that out of 484 down rows, the model predicted 430 of those to be up rows. Similarly out of 605 up rows only 48 of them were predicted as
 # down rows.
+
+train = (Weekly$Year < 2009)
+glm.fit = glm(Direction ~ Lag2, data = Weekly, subset = train, family = 'binomial')
+summary(glm.fit) #try to predict using only Lag2
+
+glm.probs = predict(glm.fit, Weekly[!train, ], type = "response")
+glm.pred = rep("Down", dim(Weekly[!train, ])[1])
+glm.pred[glm.probs > 0.5] = "Up"
+table(glm.pred, Weekly[!train, ]$Direction)
+
+mean(glm.pred == Weekly[!train, ]$Direction) # mean of ~0.625
+# The mean here reflects an accuracy of about 62.5%. Which is better than before. Out of 43 down values, 9 were predicted correctly. Similarly out of 61 up values
+# 56 were predicted correctly.
+
+mean(Weekly[!train, ]$Direction == "Up") # mean of ~0.5865
+# This mean is the accuracy of a row being correctly predicted up. Again not bad, but not much of an improvement.
+
+
