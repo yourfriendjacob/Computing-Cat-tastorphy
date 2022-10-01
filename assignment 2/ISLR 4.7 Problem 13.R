@@ -30,6 +30,8 @@ glm.full = glm(Direction ~ . - Year - Today, data = Weekly, family = 'binomial')
 summary(glm.full)
 # lag2 appears to have the highest P value of about 2.9%. This is well in a 5% significance threshold. After that Lag1 is there at around 11% P value.
 
+
+#confusion matrix
 glm.full.probs = predict(glm.full, type = 'response')
 glm.full.pred = rep('Down', 1089)
 glm.full.pred[glm.full.probs > 0.5] = 'Up'
@@ -40,6 +42,7 @@ mean(glm.full.pred == Weekly$Direction) # mean of ~0.5610
 # Note here that out of 484 down rows, the model predicted 430 of those to be up rows. Similarly out of 605 up rows only 48 of them were predicted as
 # down rows.
 
+#logistic regression with Lag2 as only predictor
 train = (Weekly$Year < 2009)
 glm.fit = glm(Direction ~ Lag2, data = Weekly, subset = train, family = 'binomial')
 summary(glm.fit) #try to predict using only Lag2
@@ -56,6 +59,7 @@ mean(glm.pred == Weekly[!train, ]$Direction) # mean of ~0.625
 mean(Weekly[!train, ]$Direction == "Up") # mean of ~0.5865
 # This mean is the accuracy of a row being correctly predicted up. Again not bad, but not much of an improvement.
 
+#LDA modeling
 lda.fit = lda(Direction ~ Lag2, data = Weekly, subset = train)
 lda.fit #use lda to create a model on Direction and Lag2
 
@@ -64,7 +68,7 @@ table(lda.pred$class, Weekly[!train, ]$Direction)
 mean(lda.pred$class == Weekly[!train, ]$Direction) # mean of ~0.625
 # This unfortunately this is about the same as previous prediction. Not much improvement. It has the same values of what predictors failed to predict correctly.
 
-#now let us try this with qda
+#QDA modeling
 qda.fit = qda(Direction ~ Lag2, data = Weekly, subset = train)
 qda.fit
 
@@ -87,6 +91,21 @@ mean(knn.pred == Weekly[!train, ]$Direction) # mean of ~0.5
 # With this model we don't get a great model here either. It has a prediction accuracy of 50%, which is more or less just guessing. Out of 43 down predictions
 # 21 were predicted correctly (~48%). Out of 61 up records 31 were predicted correctly (~51%). This is the worst accuracy, but has the best rate of not getting
 # false positives oddly enough.
+
+# Out of all the models here is a summary of everything so far
+# confusion matrix:    accuracy - 56%   true negative rate - 11% true positive rate - 92%  
+# logistic regression: accuracy - 62.5% true negative rate - 20% true positive rate - 91%  
+# LDA:                 accuracy - 62.5% true negative rate - 20% true positive rate - 91%  
+# QDA:                 accuracy - 58.6% true negative rate - 0%  true positive rate - 100% 
+# KNN k = 1:           accuracy - 50%   true negative rate - 48% true positive rate - 51%  
+# 
+# looking at just accuracy the best ones would be LDA or logistic regression. QDA just behind that and KNN k = 1 being at last.
+# however it should be noted that most of these except for KNN k = 1 had a bias to predict up weeks more than down weeks. Basically, for most of the models
+# it was more likely to predict a week to be up over down most of the time. Depending on the use case you may want to use an overall less accurate model if
+# it is predicting down weeks a little more accurately. KNN really is not great for most use cases in my opinion as it would be as good just flipping a coin
+# at the start of each week to predict. QDA is honestly not that great of a choice either as it just predicts every week as up. Sure it is "more" accurate than
+# KNN, but it is like a broken clock. It is right at least 2 times a day. LDA and logistic regression are the most useful despite them not being not much better
+# than the confusion matrix. They are pretty aggressive still with predicting up days so might not be very good for someone not wanting to take risks.
 
 
 
