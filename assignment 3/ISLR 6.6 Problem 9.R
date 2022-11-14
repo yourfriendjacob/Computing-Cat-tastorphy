@@ -2,6 +2,11 @@
 # Group name: Computing Cat-tastorphy
 # Members: Sehtab Hossain, Michelle Lu, Salam Othman, Jacob Sauther, Feng Zheng
 
+# Required packages for %>%, dummyVars, and glmnet 
+library(dplyr)
+library(caret)
+library(glmnet)
+
 # ISLR 6.6 Applied Problem 9
 
 # Load college dataset into college object
@@ -44,46 +49,53 @@ Lin.MSE = mean(mean((Lin.pred-test$Apps)^2))
 
 # c) Fit a ridge regression model on the training set, with λ chosen by cross-validation. Report the test error obtained. 
 # Ridge regression passes in a matrix for x and a vector for y
-x = model.matrix(Apps ~ ., train)
-test.x = model.matrix (Apps ~ ., test)
+
+# Create matrices for train and test sets with Private dummy-coded and Apps removed
+x = dummyVars(Apps ~ ., data = train, fullRank = F) %>%
+  predict(newdata = train) %>%
+  as.matrix()
+
+test.x = dummyVars(Apps ~ ., data = test, fullRank = F) %>%
+  predict(newdata = test) %>%
+  as.matrix()
 y = train$Apps
 
 set.seed(3)
 
 # Perform 5-fold cross-validation to determine best lambda
-CV.Ridge <- cv.glmnet(x=x, y=y, nfolds= 5)
+CV.Ridge <- cv.glmnet(x=x, y=y, alpha = 0, lambda = 10^seq(2,-2, length = 100), standardize = TRUE, nfolds= 5)
 
 # Select the lambda with the smallest mean cross-validated error
 CV.Ridge$lambda.min
 
 # alpha = 0 for ridge regression, alpha = 1 for lasso
-Ridge.mod = glmnet(x, y, alpha = 0, lambda = CV.Ridge$lambda.min)
+Ridge.mod = glmnet(x, y, alpha = 0, lambda = 10^seq(2,-2, length = 100))
 
 # Predict MSE using the lambda obtained from 5-fold cross validation on the test data
 Ridge.pred = predict(Ridge.mod, s= CV.Ridge$lambda.min, newx = test.x)
 Ridge.MSE = mean(mean((Ridge.pred-test$Apps)^2))
 
-# The Ridge MSE is approximately 1474430
+# The Ridge MSE is approximately 1585785
 
 # d) Fit a lasso model on the training set, with λ chosen by cross-validation. Report the test error obtained, 
 # along with the number of non-zero coefficient estimates.
 
 # Lambda is the same one chosen as the lambda from c)
-set.seed(3)
-CV.Lasso = cv.glmnet(x=x, y=y, nfolds= 5)
+set.seed(4)
+CV.Lasso <- cv.glmnet(x=x, y=y, alpha = 1, lambda = 10^seq(2,-2, length = 100), standardize = TRUE, nfolds= 5)
 CV.Lasso$lambda.min
 
 # alpha = 0 for ridge regression, alpha = 1 for lasso
-Lasso.mod = glmnet(x, y, alpha = 1, lambda = CV.Lasso$lambda.min)
+Lasso.mod = glmnet(x, y, alpha = 1, lambda = 10^seq(2,-2, length = 100))
 
 # Predict MSE using the lambda obtained from 5-fold cross validation on the test data
 Lasso.pred = predict(Lasso.mod, s= CV.Lasso$lambda.min, newx = test.x)
 Lasso.MSE = mean(mean((Lasso.pred-test$Apps)^2))
 
-# The Lasso MSE is approximately 1441435
+# The Lasso MSE is approximately 1444742
 
 # Predict lasso coefficients
 Lasso.coeff = predict(Lasso.mod, type = "coefficients", s = CV.Lasso$lambda.min)
-round (Lasso.coeff, 3)
+round(Lasso.coeff, 3)
 
-# There are 17 nonzero coefficients
+# There are 18 nonzero coefficients
