@@ -70,7 +70,7 @@ Ridge.MSE = mean(mean((Ridge.pred-test$Apps)^2))
 
 # Lambda is the same one chosen as the lambda from c)
 set.seed(3)
-CV.Lasso <- cv.glmnet(x=x, y=y, nfolds= 5)
+CV.Lasso = cv.glmnet(x=x, y=y, nfolds= 5)
 CV.Lasso$lambda.min
 
 # alpha = 0 for ridge regression, alpha = 1 for lasso
